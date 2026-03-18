@@ -1,0 +1,121 @@
+import type { CommonFilter, IDType, WikimediaUsername } from "../_";
+import type { Role } from "../role";
+import type { RoundStatusType } from "./status";
+
+// These are the restrictions that are applied to the articles that are submitted to the campaign
+type RoundCommonRestrictions = {
+  allowJuryToParticipate: boolean;
+  allowMultipleJudgement: boolean;
+  secretBallot: boolean;
+  blacklist: string;
+};
+
+export const Media = {
+  AUDIO: "AUDIO",
+  VIDEO: "VIDEO",
+  IMAGE: "BITMAP",
+  ARTICLE: "ARTICLE",
+  DRAWING: "DRAWING",
+};
+
+export type MediaType = (typeof Media)[keyof typeof Media];
+
+export const Evaluation = {
+  BINARY: "binary",
+  RANKING: "ranking",
+  SCORE: "score",
+};
+
+export type EvaluationType = (typeof Evaluation)[keyof typeof Evaluation];
+
+type MediaTypeSet = MediaType[];
+
+// These are the restrictions that are applied to the audio and video that are submitted to the campaign
+type RoundAudioRestrictions = {
+  audioMinimumDurationMilliseconds: number;
+  audioMinimumSizeBytes: number;
+};
+
+export type RoundVideoRestrictions = {
+  videoMinimumDurationMilliseconds: number;
+  videoMinimumSizeBytes: number;
+  videoMinimumResolution: number;
+};
+
+// These are the restrictions that are applied to the images that are submitted to the campaign
+type RoundImageRestrictions = {
+  imageMinimumResolution: number;
+  imageMinimumSizeBytes: number;
+};
+
+export type RoundArticleRestrictions = {
+  maximumSubmissionOfSameArticle: number;
+  articleAllowExpansions: boolean;
+  articleAllowCreations: boolean;
+  articleMinimumTotalBytes: number;
+  articleMinimumTotalWords: number;
+  articleMinimumAddedBytes: number;
+  articleMinimumAddedWords: number;
+};
+
+export type RoundMediaRestrictions = RoundImageRestrictions &
+  RoundAudioRestrictions &
+  RoundVideoRestrictions;
+
+// These are the restrictions that are applied to
+type RoundRestrictions = RoundCommonRestrictions &
+  RoundMediaRestrictions &
+  RoundArticleRestrictions & {
+    allowedMediaTypes: MediaTypeSet;
+  };
+
+export type RoundWritable = {
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  isOpen: boolean;
+  isPublicJury: boolean;
+  dependsOnRoundId?: string;
+  serial: number;
+  type: EvaluationType;
+  quorum: number;
+} & RoundRestrictions;
+export type RoundCreate = {
+  campaignId: IDType;
+  jury: WikimediaUsername[];
+} & RoundWritable;
+
+export type Round = {
+  roundId: IDType;
+  campaignId: IDType;
+  createdAt?: string;
+  createdById: IDType;
+  totalSubmissions: number;
+  totalEvaluatedSubmissions: number;
+  totalEvaluatedAssignments: number;
+  totalAssignments: number;
+  status: RoundStatusType;
+  latestDistributionTaskId?: IDType;
+  roles: Role[] | null;
+  jury: { [k: IDType]: WikimediaUsername } | null;
+} & RoundWritable;
+
+export type RoundFilter = {
+  campaignId: IDType;
+  status: RoundStatusType;
+} & CommonFilter;
+
+export interface SubmissionResultSummary {
+  readonly averageScore: number;
+  submissionCount: number;
+}
+
+export interface SubmissionResult {
+  readonly author: string;
+  readonly juryCount: number;
+  readonly name: string;
+  readonly score: number;
+  readonly submissionId: string;
+  readonly type: string;
+}
